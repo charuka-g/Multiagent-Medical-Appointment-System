@@ -1,0 +1,18 @@
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	supervisor(supervisor)
+	doctor_appointment_agent(doctor_appointment_agent)
+	lab_diagnostics_agent(lab_diagnostics_agent)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> supervisor;
+	supervisor -.-> doctor_appointment_agent;
+	supervisor -.-> lab_diagnostics_agent;
+	supervisor -.-> __end__;
+	doctor_appointment_agent -.-> supervisor;
+	doctor_appointment_agent -.-> __end__;
+	lab_diagnostics_agent -.-> supervisor;
+	lab_diagnostics_agent -.-> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

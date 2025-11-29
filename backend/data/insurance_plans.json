@@ -1,0 +1,23 @@
+{
+  "HP-2045": {
+    "provider": "HealthPlus",
+    "status": "active",
+    "coverage": "Comprehensive dental including preventive, restorative, and emergency visits",
+    "copay": "$25",
+    "deductible": "$250"
+  },
+  "HP-9921": {
+    "provider": "HealthPlus",
+    "status": "inactive",
+    "coverage": "Plan expired on 2024-05-31",
+    "copay": "$40",
+    "deductible": "$500"
+  },
+  "CL-8844": {
+    "provider": "CareLine",
+    "status": "pending_verification",
+    "coverage": "Waiting on updated employment documentation",
+    "copay": "$30",
+    "deductible": "$400"
+  }
+}

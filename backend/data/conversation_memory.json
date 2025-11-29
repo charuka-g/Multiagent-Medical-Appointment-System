@@ -1,0 +1,138 @@
+{
+  "10232303": {
+    "summary": "The user successfully booked an appointment with Dr. Jane Smith on September 2, 2024, at 8:00 am, despite originally having a preference for Dr. Daniel Miller.",
+    "slots": {
+      "preferred_doctor": "Dr. Jane Smith",
+      "insurance_id": "HP-2045",
+      "symptoms": "swelling and difficulty chewing",
+      "appointment_date": "2024-09-02",
+      "next_action": "verify_identity"
+    },
+    "last_updated": "2025-11-16T14:12:53.589011"
+  },
+  "10232313": {
+    "summary": "Repeated attempts were made to gather information on the user's preferred doctor and urgency of their symptoms. However, no confirmation was received about the preferred doctor or whether the swelling and difficulty in chewing are urgent. The appointment is mentioned for September 2, 2024.",
+    "slots": {
+      "appointment_date": "2024-09-02"
+    },
+    "last_updated": "2025-11-16T13:59:14.155869"
+  },
+  "10232315": {
+    "summary": "An appointment was successfully scheduled with Dr. Daniel Miller for the user on September 2, 2024, at 9:00 AM.",
+    "slots": {
+      "preferred_doctor": "Dr. Daniel Miller",
+      "appointment_date": "2024-09-02"
+    },
+    "last_updated": "2025-11-16T13:59:58.891409"
+  },
+  "10232318": {
+    "summary": "The user attempted to book an appointment with Dr. Emily Johnson for 2024-09-02 at 8am, but the doctor was unavailable at that time. Repeated requests were made for the user to provide an alternative date/time, a preferred doctor, and a preferred clinic location, but no reply was received. The session was consequently ended.",
+    "slots": {},
+    "last_updated": "2025-11-16T14:03:23.122485"
+  },
+  "10232518": {
+    "summary": "User intends to book an appointment with Dr. Jane Smith on September 2, 2024, at 8 AM, but has not provided crucial details such as the location and type of the appointment.",
+    "slots": {
+      "preferred_doctor": "Dr. Jane Smith",
+      "appointment_date": "September 2, 2024, at 8 AM"
+    },
+    "last_updated": "2025-11-16T14:06:44.117552"
+  },
+  "12324": {
+    "summary": "Attempted to book an appointment for John Doe on September 2, 2024, but repeated errors with the provided ID number format persist. The ID must be a 7 or 8-digit number to complete the booking.",
+    "slots": {
+      "appointment_date": "2024-09-02",
+      "user_id": "12324"
+    },
+    "last_updated": "2025-11-22T15:04:15.165872"
+  },
+  "1": {
+    "summary": "The user asked about which doctor is good for general dental issues and received information about four general dentists: John Doe (gentle approach, specializes in preventative care), Emily Johnson (holistic approach, skilled in long-term plans), Sarah Wilson (focus on family dentistry), and Michael Green (proficient in complex dental problems and surgeries).",
+    "slots": {},
+    "last_updated": "2025-11-22T15:00:46.246609"
+  },
+  "1000048": {
+    "summary": "An appointment for Michael Green with Dr. Michael Green has been successfully booked for August 8, 2024, at 8:00 AM. There was no conflict with a prior unconfirmed booking at 8:30 AM on the same day.",
+    "slots": {
+      "appointment_date": "2024-08-08 08:00"
+    },
+    "last_updated": "2025-11-22T15:11:39.580766"
+  },
+  "42152366": {
+    "summary": "User confirmed Dr. Sarah Wilson is unavailable on 18-12-2024.",
+    "slots": {
+      "preferred_doctor": "Dr. Sarah Wilson",
+      "appointment_date": "18-12-2024"
+    },
+    "last_updated": "2025-11-24T16:55:02.056113"
+  },
+  "40946345": {
+    "summary": "User requested an appointment with Dr. Sarah Wilson, a general dentist, on August 24, 2024, but no slots are available. The user has been prompted to consider alternative dates or other general dentists.",
+    "slots": {
+      "preferred_doctor": "Dr. Sarah Wilson",
+      "appointment_date": "08-24-2024",
+      "preferred_dentist": "general dentist"
+    },
+    "last_updated": "2025-11-26T02:12:51.661793"
+  },
+  "13523426": {
+    "summary": "The payment process is beyond the system's capabilities and the task was completed after confirming the next step involves payment.",
+    "slots": {
+      "appointment_date": "2024-09-02",
+      "preferred_doctor": "Dr. Robert Martinez"
+    },
+    "last_updated": "2025-11-26T02:46:39.095052"
+  },
+  "12362235": {
+    "summary": "The user attempted to book a Complete Blood Count test on November 26, 2025, at 10:00 AM, but no slots were available. There was also an issue with the ID number provided. The user needs to choose another date or time for the test and correct the ID number.",
+    "slots": {
+      "appointment_date": "26-11-2025",
+      "next_action": "User needs to choose another date or time for the test, and correct the ID number."
+    },
+    "last_updated": "2025-11-26T17:27:23.174200"
+  },
+  "87584448": {
+    "summary": "User, identified by ID 87584448, has successfully booked an appointment with Dr. Daniel Miller at 10:00 AM on September 8, 2024.",
+    "slots": {
+      "appointment_date": "09-08-2024",
+      "user_id": "87584448",
+      "preferred_doctor": "Dr. Daniel Miller"
+    },
+    "last_updated": "2025-11-28T03:12:53.496211"
+  },
+  "187584491": {
+    "summary": "The booking for a lipid panel test using ID number 18758449 has not been finalized due to persistent syntax errors. Attempts were made to complete the booking for a test scheduled at 09:00 on 27-11-2025.",
+    "slots": {
+      "appointment_date": "27-11-2025",
+      "available_slots": [
+        "09:00",
+        "11:00",
+        "13:00"
+      ],
+      "test_type": "Lipid Panel",
+      "next_action": "await_user_id",
+      "test_id": "18758449"
+    },
+    "last_updated": "2025-11-28T03:33:19.069781"
+  },
+  "87584491": {
+    "summary": "User ID 87584491 successfully booked a lipid panel test for November 27, 2025, at 11 AM, costs $65.00, booking reference LAB-6FCB2B51.",
+    "slots": {
+      "appointment_date": "November 27, 2025",
+      "identification_number": "87584491"
+    },
+    "last_updated": "2025-11-28T10:51:08.026196"
+  },
+  "63239829": {
+    "summary": "The user's appointment with Dr. John Doe on 10-12-2025 remains scheduled, while the appointment with Dr. Alexander Turner on 13-12-2025 has been cancelled.",
+    "slots": {
+      "preferred_doctor": "John Doe",
+      "appointment_date": "10-12-2025",
+      "appointment_time": "10:30 AM",
+      "user_id": "63239829",
+      "booking_reference": "DOC-0B91D09F",
+      "consultation_fee": 227.66
+    },
+    "last_updated": "2025-11-29T02:59:04.437455"
+  }
+}

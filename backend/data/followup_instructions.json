@@ -1,0 +1,29 @@
+{
+  "post_cleaning": {
+    "summary": "Expect minor gum sensitivity for 24 hours. Avoid staining foods and brush gently.",
+    "tips": [
+      "Rinse with warm salt water twice a day.",
+      "Delay coffee or wine for 12 hours.",
+      "Use a soft-bristle brush tonight."
+    ],
+    "next_check_in_days": 180
+  },
+  "root_canal": {
+    "summary": "Mild soreness is typical for 48 hours. Continue antibiotics if prescribed.",
+    "tips": [
+      "Take ibuprofen every 6 hours as needed unless contraindicated.",
+      "Stick to soft foods on the treated side.",
+      "Call us immediately if swelling increases after day 3."
+    ],
+    "next_check_in_days": 30
+  },
+  "teeth_whitening": {
+    "summary": "Temporary sensitivity to cold drinks can occur for up to 72 hours.",
+    "tips": [
+      "Use sensitivity toothpaste twice daily.",
+      "Avoid deeply pigmented foods for 48 hours.",
+      "Sip cool water to reduce discomfort."
+    ],
+    "next_check_in_days": 14
+  }
+}

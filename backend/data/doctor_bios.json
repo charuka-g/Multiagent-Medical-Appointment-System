@@ -1,0 +1,28 @@
+{
+  "jane smith": {
+    "specialization": "general_dentist",
+    "experience": "12 years",
+    "bio": "Focuses on preventive care, minimally invasive restorations, and patient education.",
+    "languages": [
+      "English",
+      "Spanish"
+    ]
+  },
+  "john doe": {
+    "specialization": "oral_surgeon",
+    "experience": "15 years",
+    "bio": "Handles complex extractions and facial trauma, coordinates with anesthesiology teams.",
+    "languages": [
+      "English"
+    ]
+  },
+  "emily johnson": {
+    "specialization": "orthodontist",
+    "experience": "10 years",
+    "bio": "Specializes in aligners and growth-guided orthodontics for teens.",
+    "languages": [
+      "English",
+      "Hindi"
+    ]
+  }
+}
