@@ -6,3 +6,4 @@ scripts
 scripts/*
 seed_dummy_data.py
 seed_medical_appointments.py
+requirements.txt

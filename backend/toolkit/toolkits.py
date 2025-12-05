@@ -2,8 +2,6 @@ from typing import Literal
 from langchain_core.tools import tool
 from data_models.models import *
 from dotenv import load_dotenv
-# import os
-# import psycopg2
 from datetime import datetime, timedelta
 import uuid
 from db.db_connection import connect_to_db

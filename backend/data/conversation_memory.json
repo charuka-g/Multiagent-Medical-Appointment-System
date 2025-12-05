@@ -134,5 +134,13 @@
       "consultation_fee": 227.66
     },
     "last_updated": "2025-11-29T02:59:04.437455"
+  },
+  "24532673": {
+    "summary": "The user wants to book a cardiologist appointment soon but there are no available slots on October 27, 2023. The user has been offered to check for the next available dates.",
+    "slots": {
+      "appointment_specialty": "cardiologist",
+      "desired_appointment_date": "October 27, 2023"
+    },
+    "last_updated": "2025-11-29T06:30:11.142406"
   }
 }
