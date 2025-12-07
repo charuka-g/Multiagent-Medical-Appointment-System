@@ -15,3 +15,4 @@ test_s3.py
 test_s3_operations.py
 schema.sql
 test_env_vars.py
+test*
