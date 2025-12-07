@@ -2,6 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react'
 
+// Backend URL from environment variable (fallback to localhost for development)
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
+
 interface Message {
   role: 'user' | 'assistant'
   content: string
@@ -41,7 +44,7 @@ export default function ChatInterface({ idNumber, onBack }: ChatInterfaceProps) 
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/backend/execute', {
+      const response = await fetch(`${BACKEND_URL}/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,7 +95,7 @@ export default function ChatInterface({ idNumber, onBack }: ChatInterfaceProps) 
       console.error('Error sending message:', error)
       const errorMessage: Message = {
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please make sure the backend server is running on http://localhost:8000',
+        content: 'Sorry, I encountered an error. Please try again later.',
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, errorMessage])

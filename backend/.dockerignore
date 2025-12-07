@@ -72,3 +72,7 @@ scripts/
 scripts/**
 seed_dummy_data.py
 seed_medical_appointments.p
+
+test*
+test_s3.py
+test_s3_operations.py

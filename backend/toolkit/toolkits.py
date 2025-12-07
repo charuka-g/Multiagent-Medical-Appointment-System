@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import uuid
 from db.db_connection import connect_to_db
-from utils.data_access import load_json_file
 
 
 @tool

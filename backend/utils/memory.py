@@ -26,17 +26,13 @@ def _write_memory_store(store: Dict[str, MemoryRecord]) -> None:
 
 
 def load_memory_bundle(id_number: int) -> Dict[str, Any]:
-    """Return stored memory plus profile metadata for the patient."""
+    """Return stored memory for the patient."""
     store = _load_memory_store()
     conversation_memory = store.get(str(id_number), {})
-    patient_profiles = load_json_file("patient_profiles.json", default={}) or {}
-    patient_profile = patient_profiles.get(str(id_number), {})
 
     bundle: Dict[str, Any] = {
         "summary": conversation_memory.get("summary", ""),
         "slots": conversation_memory.get("slots", {}),
-        "patient_profile": patient_profile,
-        "patient_verified": bool(patient_profile.get("verified")),
     }
     return bundle
 
@@ -51,14 +47,6 @@ def format_memory_context(bundle: Dict[str, Any]) -> str:
     slots = bundle.get("slots") or {}
     for key, value in slots.items():
         lines.append(f"{key}: {value}")
-    profile = bundle.get("patient_profile") or {}
-    if profile:
-        preferred = profile.get("preferred_doctor")
-        if preferred:
-            lines.append(f"Preferred doctor on file: {preferred}")
-        insurance = profile.get("insurance_id")
-        if insurance:
-            lines.append(f"Insurance policy: {insurance}")
     return "\n".join(lines)
 
 

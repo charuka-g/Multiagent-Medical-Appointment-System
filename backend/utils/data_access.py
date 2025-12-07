@@ -1,33 +1,46 @@
-import json
-from pathlib import Path
-from typing import Any, Dict
+"""
+Data access module for JSON files.
+All files are stored exclusively in S3 - no local filesystem support.
+"""
 
-DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+from typing import Any
+import logging
 
+logger = logging.getLogger(__name__)
 
-def ensure_data_dir() -> None:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+# Import S3 data access functions
+try:
+    from utils.s3_data_access import (
+        load_json_file_from_s3,
+        write_json_file_to_s3
+    )
+    S3_AVAILABLE = True
+except ImportError:
+    S3_AVAILABLE = False
+    logger.error("S3 data access not available. Cannot load/write files.")
 
 
 def load_json_file(filename: str, default: Any = None) -> Any:
     """
-    Load a JSON file from the shared data directory. If the file does not exist,
-    optionally seed it with `default`.
+    Load a JSON file from S3.
+    All files are stored exclusively in S3 - no local filesystem support.
     """
-    ensure_data_dir()
-    path = DATA_DIR / filename
-    if not path.exists():
-        if default is not None:
-            path.write_text(json.dumps(default, indent=2), encoding="utf-8")
-            return default
-        return default
-    with path.open("r", encoding="utf-8") as f:
-        return json.load(f)
+    if not S3_AVAILABLE:
+        raise RuntimeError(
+            f"Cannot load {filename}: S3 storage is required. "
+            "Please ensure S3 is configured with AWS credentials."
+        )
+    return load_json_file_from_s3(filename, default)
 
 
 def write_json_file(filename: str, payload: Any) -> None:
-    """Persist payload into the shared data directory."""
-    ensure_data_dir()
-    path = DATA_DIR / filename
-    with path.open("w", encoding="utf-8") as f:
-        json.dump(payload, f, indent=2)
+    """
+    Write a JSON file to S3.
+    All files are stored exclusively in S3 - no local filesystem support.
+    """
+    if not S3_AVAILABLE:
+        raise RuntimeError(
+            f"Cannot write {filename}: S3 storage is required. "
+            "Please ensure S3 is configured with AWS credentials."
+        )
+    write_json_file_to_s3(filename, payload)

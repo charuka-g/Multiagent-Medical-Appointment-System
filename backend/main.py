@@ -12,6 +12,11 @@ from utils.memory import (
     summarize_and_store_conversation,
 )
 
+FRONTEND_ORIGIN = os.getenv(
+    "FRONTEND_ORIGIN",
+    "http://localhost:8000",
+)
+
 os.environ.pop("SSL_CERT_FILE", None)
 
 app = FastAPI()
@@ -19,7 +24,7 @@ app = FastAPI()
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=FRONTEND_ORIGIN,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

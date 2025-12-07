@@ -4,6 +4,14 @@
 seed*
 scripts
 scripts/*
+seed_bookings.py
 seed_dummy_data.py
 seed_medical_appointments.py
+visualize_agent_graph.py
 requirements.txt
+test*
+test_db_connection.py
+test_s3.py
+test_s3_operations.py
+schema.sql
+test_env_vars.py
