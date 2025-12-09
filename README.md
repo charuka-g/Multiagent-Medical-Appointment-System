@@ -365,7 +365,7 @@ This project is licensed under the MIT License.
 ## Author
 
 **Charuka Gunawardhane**
-- Email: charukagunawardhane999@gmail.com
+- Email: charukagunawardhaneixvii@gmail.com
 
 ## Acknowledgments
 

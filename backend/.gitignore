@@ -16,3 +16,4 @@ test_s3_operations.py
 schema.sql
 test_env_vars.py
 test*
+conversation_memory.json
