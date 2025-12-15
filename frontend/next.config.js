@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'export', // Required for static export to S3
+  // output: 'export', // Required for static export to S3
   images: {
     unoptimized: true, // Required for static export
   },

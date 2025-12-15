@@ -6,6 +6,7 @@ import PaymentGatewayTile from './PaymentGatewayTile'
 
 // Backend URL from environment variable (fallback to localhost for development)
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
+// const BACKEND_URL='http://localhost:8000'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -13,6 +14,7 @@ interface Message {
   timestamp?: Date
   bookingData?: {
     type: 'confirmation' | 'payment'
+    status?: 'booked' | 'cancelled' | 'rescheduled' | 'pending'
     bookingReference?: string
     bookingType?: 'doctor' | 'lab'
     bookingDetail?: string
@@ -124,6 +126,8 @@ export default function ChatWidget({ idNumber }: ChatWidgetProps) {
 
       // Parse message for booking confirmation or payment requests
       const bookingData = parseBookingMessage(assistantMessage)
+      console.log('🔍 Regular message - Assistant message:', assistantMessage)
+      console.log('🔍 Regular message - Parsed booking data:', bookingData)
 
       const aiMessage: Message = {
         role: 'assistant',
@@ -154,13 +158,16 @@ export default function ChatWidget({ idNumber }: ChatWidgetProps) {
   }
 
   const parseBookingMessage = (message: string): Message['bookingData'] | undefined => {
-    // Parse BOOKING_CREATED message
-    const bookingCreatedMatch = message.match(/BOOKING_CREATED: Booking reference (\w+).*?(?:Doctor|Test): ([^,]+).*?Date: ([^,]+).*?Amount: \$([\d.]+)/i)
+    const lowerMessage = message.toLowerCase()
+    
+    // Parse BOOKING_CREATED message (confirmation tile) - pending confirmation
+    const bookingCreatedMatch = message.match(/BOOKING_CREATED: Booking (?:reference )?(\w+).*?(?:Doctor|Test): ([^,]+).*?Date: ([^,]+).*?Amount: \$([\d.]+)/i)
     if (bookingCreatedMatch) {
       const [, ref, detail, date, amount] = bookingCreatedMatch
-      const isDoctor = message.toLowerCase().includes('doctor')
+      const isDoctor = lowerMessage.includes('doctor')
       return {
         type: 'confirmation',
+        status: 'pending', // Pending confirmation - show buttons
         bookingReference: ref,
         bookingType: isDoctor ? 'doctor' : 'lab',
         bookingDetail: detail.trim(),
@@ -169,22 +176,205 @@ export default function ChatWidget({ idNumber }: ChatWidgetProps) {
       }
     }
 
-    // Parse BOOKING_CONFIRMED message (should show payment)
-    const bookingConfirmedMatch = message.match(/BOOKING_CONFIRMED: Booking (\w+).*?Amount: \$([\d.]+)/i)
-    if (bookingConfirmedMatch && message.toLowerCase().includes('proceeding to payment')) {
-      const [, ref, amount] = bookingConfirmedMatch
-      // Extract booking details from previous context or message
-      const detailMatch = message.match(/(?:Doctor Appointment|Lab Test): ([^,]+)/i)
-      const dateMatch = message.match(/Date: ([^,]+)/i)
-      const isDoctor = message.toLowerCase().includes('doctor appointment')
+    // Parse successful appointment completion messages (confirmation tile)
+    // Pattern: "Successfully booked Dr. {name} for {date}..."
+    const successBookedMatch = message.match(/Successfully booked Dr\. ([^,]+) for ([^(]+)/i)
+    if (successBookedMatch) {
+      const [, doctorName, date] = successBookedMatch
+      // Extract consultation fee if present
+      const feeMatch = message.match(/Consultation Fee: \$([\d.]+)/i) || message.match(/\$([\d.]+)/)
+      const amount = feeMatch ? parseFloat(feeMatch[1]) : 0
+      
+      // Generate a booking reference from doctor name and date, or extract if present
+      const refMatch = message.match(/(?:Booking|Reference)[\s:]+(\w+)/i)
+      const bookingRef = refMatch ? refMatch[1] : `BOOK-${doctorName.replace(/\s+/g, '').substring(0, 6).toUpperCase()}-${Date.now().toString().slice(-6)}`
+      
+      return {
+        type: 'confirmation',
+        status: 'booked', // Completed booking - no buttons
+        bookingReference: bookingRef,
+        bookingType: 'doctor',
+        bookingDetail: doctorName.trim(),
+        date: date.trim(),
+        amount: amount,
+      }
+    }
+
+    // Pattern: "Successfully cancelled the appointment with Dr. {name} on {date}..."
+    const successCancelledMatch = message.match(/Successfully cancelled (?:the )?appointment (?:with )?Dr\. ([^,]+) on ([^(]+)/i)
+    if (successCancelledMatch) {
+      const [, doctorName, date] = successCancelledMatch
+      const feeMatch = message.match(/\$([\d.]+)/)
+      const amount = feeMatch ? parseFloat(feeMatch[1]) : 0
+      
+      const refMatch = message.match(/(?:Booking|Reference)[\s:]+(\w+)/i)
+      const bookingRef = refMatch ? refMatch[1] : `CANCEL-${doctorName.replace(/\s+/g, '').substring(0, 6).toUpperCase()}-${Date.now().toString().slice(-6)}`
+      
+      return {
+        type: 'confirmation',
+        status: 'cancelled', // Cancelled - no buttons
+        bookingReference: bookingRef,
+        bookingType: 'doctor',
+        bookingDetail: doctorName.trim(),
+        date: date.trim(),
+        amount: amount,
+      }
+    }
+
+    // Pattern: "Successfully rescheduled appointment with Dr. {name} from {old} to {new}..."
+    const successRescheduledMatch = message.match(/Successfully rescheduled appointment with Dr\. ([^,]+) from ([^,]+) to ([^(]+)/i)
+    if (successRescheduledMatch) {
+      const [, doctorName, oldDate, newDate] = successRescheduledMatch
+      const feeMatch = message.match(/Consultation Fee: \$([\d.]+)/i) || message.match(/\$([\d.]+)/)
+      const amount = feeMatch ? parseFloat(feeMatch[1]) : 0
+      
+      const refMatch = message.match(/(?:Booking|Reference)[\s:]+(\w+)/i)
+      const bookingRef = refMatch ? refMatch[1] : `RESCHEDULE-${doctorName.replace(/\s+/g, '').substring(0, 6).toUpperCase()}-${Date.now().toString().slice(-6)}`
+      
+      return {
+        type: 'confirmation',
+        status: 'rescheduled', // Rescheduled - no buttons
+        bookingReference: bookingRef,
+        bookingType: 'doctor',
+        bookingDetail: doctorName.trim(),
+        date: newDate.trim(),
+        amount: amount,
+      }
+    }
+
+    // Pattern: General appointment confirmation messages
+    // Matches: "appointment with Dr. {name} on {date} has been confirmed/booked/completed"
+    if (lowerMessage.includes('appointment') && (lowerMessage.includes('confirmed') || lowerMessage.includes('booked') || lowerMessage.includes('completed') || lowerMessage.includes('successfully'))) {
+      // Skip if it's a cancellation or reschedule (already handled above)
+      if (!lowerMessage.includes('cancelled') && !lowerMessage.includes('rescheduled')) {
+        const doctorMatch = message.match(/Dr\.\s*([^,\n.]+)/i) || message.match(/doctor\s+([^,\n.]+)/i)
+        const dateMatch = message.match(/(\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2})|(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2})|(on\s+[^,\n.]+(?:date|time))/i)
+        const feeMatch = message.match(/\$([\d.]+)/)
+        
+        if (doctorMatch || dateMatch) {
+          const doctorName = doctorMatch ? doctorMatch[1].trim() : 'Doctor Appointment'
+          const date = dateMatch ? (dateMatch[1] || dateMatch[2] || dateMatch[3] || '').trim() : ''
+          const amount = feeMatch ? parseFloat(feeMatch[1]) : 0
+          
+          // Try to extract booking reference if present
+          const refMatch = message.match(/(?:booking|reference|ref)[\s:]+(\w+)/i)
+          const bookingRef = refMatch ? refMatch[1] : `CONF-${Date.now().toString().slice(-8)}`
+          
+          return {
+            type: 'confirmation',
+            status: 'booked', // Completed booking - no buttons
+            bookingReference: bookingRef,
+            bookingType: 'doctor',
+            bookingDetail: doctorName,
+            date: date,
+            amount: amount,
+          }
+        }
+      }
+    }
+
+    // Pattern: General cancellation messages
+    if (lowerMessage.includes('cancelled') || lowerMessage.includes('canceled')) {
+      const doctorMatch = message.match(/Dr\.\s*([^,\n.]+)/i) || message.match(/doctor\s+([^,\n.]+)/i)
+      const dateMatch = message.match(/(\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2})|(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2})|(on\s+[^,\n.]+(?:date|time))/i)
+      
+      if (doctorMatch || dateMatch) {
+        const doctorName = doctorMatch ? doctorMatch[1].trim() : 'Doctor Appointment'
+        const date = dateMatch ? (dateMatch[1] || dateMatch[2] || dateMatch[3] || '').trim() : ''
+        
+        const refMatch = message.match(/(?:booking|reference|ref)[\s:]+(\w+)/i)
+        const bookingRef = refMatch ? refMatch[1] : `CANCEL-${Date.now().toString().slice(-8)}`
+        
+        return {
+          type: 'confirmation',
+          status: 'cancelled', // Cancelled - no buttons
+          bookingReference: bookingRef,
+          bookingType: 'doctor',
+          bookingDetail: doctorName,
+          date: date,
+          amount: 0,
+        }
+      }
+    }
+
+    // Pattern: General reschedule messages
+    if (lowerMessage.includes('rescheduled') || lowerMessage.includes('reschedule')) {
+      const doctorMatch = message.match(/Dr\.\s*([^,\n.]+)/i) || message.match(/doctor\s+([^,\n.]+)/i)
+      const dateMatch = message.match(/(?:to|on)\s+([^,\n.]+(?:date|time)?)/i) || message.match(/(\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2})/i)
+      const feeMatch = message.match(/\$([\d.]+)/)
+      
+      if (doctorMatch) {
+        const doctorName = doctorMatch[1].trim()
+        const date = dateMatch ? dateMatch[1].trim() : ''
+        const amount = feeMatch ? parseFloat(feeMatch[1]) : 0
+        
+        const refMatch = message.match(/(?:booking|reference|ref)[\s:]+(\w+)/i)
+        const bookingRef = refMatch ? refMatch[1] : `RESCHEDULE-${Date.now().toString().slice(-8)}`
+        
+        return {
+          type: 'confirmation',
+          status: 'rescheduled', // Rescheduled - no buttons
+          bookingReference: bookingRef,
+          bookingType: 'doctor',
+          bookingDetail: doctorName,
+          date: date,
+          amount: amount,
+        }
+      }
+    }
+
+    // Parse BOOKING_CONFIRMED message (payment tile) - More flexible matching
+    // Try multiple patterns to catch different backend response formats
+    let bookingRef: string | undefined
+    let amount: number | undefined
+    
+    // Pattern 1: BOOKING_CONFIRMED: Booking <ref>...Amount: $<amount>
+    const pattern1 = message.match(/BOOKING_CONFIRMED: Booking (\w+).*?Amount: \$([\d.]+)/i)
+    if (pattern1) {
+      bookingRef = pattern1[1]
+      amount = parseFloat(pattern1[2])
+    }
+    
+    // Pattern 2: Booking <ref> confirmed...Amount: $<amount> or $<amount> for booking <ref>
+    if (!bookingRef) {
+      const pattern2 = message.match(/Booking (\w+).*?(?:confirmed|proceed).*?Amount: \$([\d.]+)/i) ||
+                     message.match(/Amount: \$([\d.]+).*?Booking (\w+)/i)
+      if (pattern2) {
+        bookingRef = pattern2[1] || pattern2[2]
+        amount = parseFloat(pattern2[2] || pattern2[1])
+      }
+    }
+    
+    // Pattern 3: Look for booking reference and amount anywhere in the message
+    if (!bookingRef) {
+      const refMatch = message.match(/(?:booking|reference)[\s:]+(\w+)/i)
+      const amountMatch = message.match(/\$([\d.]+)/)
+      if (refMatch && amountMatch) {
+        bookingRef = refMatch[1]
+        amount = parseFloat(amountMatch[1])
+      }
+    }
+
+    // If we found a booking reference and amount, and message indicates payment
+    if (bookingRef && amount && (
+      lowerMessage.includes('proceeding to payment') ||
+      lowerMessage.includes('proceed to payment') ||
+      lowerMessage.includes('payment') ||
+      lowerMessage.includes('pay') ||
+      lowerMessage.includes('confirmed')
+    )) {
+      // Try to extract booking details
+      const detailMatch = message.match(/(?:Doctor Appointment|Lab Test|Doctor|Test): ([^,.\n]+)/i)
+      const dateMatch = message.match(/Date: ([^,.\n]+)/i)
+      const isDoctor = lowerMessage.includes('doctor')
       
       return {
         type: 'payment',
-        bookingReference: ref,
+        bookingReference: bookingRef,
         bookingType: isDoctor ? 'doctor' : 'lab',
         bookingDetail: detailMatch ? detailMatch[1].trim() : '',
         date: dateMatch ? dateMatch[1].trim() : '',
-        amount: parseFloat(amount),
+        amount: amount,
       }
     }
 
@@ -245,6 +435,9 @@ export default function ChatWidget({ idNumber }: ChatWidgetProps) {
       }
 
       const bookingData = parseBookingMessage(assistantMessage)
+      console.log('🔍 Booking confirmation - Assistant message:', assistantMessage)
+      console.log('🔍 Booking confirmation - Parsed booking data:', bookingData)
+      
       const aiMessage: Message = {
         role: 'assistant',
         content: assistantMessage,
@@ -447,6 +640,7 @@ export default function ChatWidget({ idNumber }: ChatWidgetProps) {
                       bookingDetail={message.bookingData.bookingDetail || ''}
                       date={message.bookingData.date || ''}
                       amount={message.bookingData.amount || 0}
+                      status={message.bookingData.status || 'pending'}
                       onConfirm={() => handleConfirmBooking(message.bookingData!.bookingReference!)}
                       onCancel={() => {}}
                     />

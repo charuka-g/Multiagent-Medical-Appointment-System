@@ -14,7 +14,7 @@ from utils.memory import (
 
 FRONTEND_ORIGIN = os.getenv(
     "FRONTEND_ORIGIN",
-    "http://localhost:8000",
+    "http://localhost:3000",
 )
 
 os.environ.pop("SSL_CERT_FILE", None)

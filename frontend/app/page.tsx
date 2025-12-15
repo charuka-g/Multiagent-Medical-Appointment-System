@@ -13,7 +13,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                 <svg
                   className="w-6 h-6 text-white"
                   fill="none"
@@ -34,26 +34,20 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <a href="#" className="text-slate-700 hover:text-blue-600 text-sm font-medium">Services</a>
-              <a href="#" className="text-slate-700 hover:text-blue-600 text-sm font-medium">Doctors</a>
-              <a href="#" className="text-slate-700 hover:text-blue-600 text-sm font-medium">Contact</a>
+              <a href="#" className="text-slate-700 hover:text-blue-900 text-sm font-medium">Services</a>
+              <a href="#" className="text-slate-700 hover:text-blue-900 text-sm font-medium">Doctors</a>
+              <a href="#" className="text-slate-700 hover:text-blue-900 text-sm font-medium">Contact</a>
             </div>
           </div>
         </div>
       </nav>
 
       {/* Hero Section with Doctor Image */}
-      <section className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+      <section className="relative bg-gradient-to-r from-blue-900 to-blue-950 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             {/* Left Side - Text Content */}
             <div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-                Your Health, Our Priority
-              </h2>
-              <p className="text-xl md:text-2xl text-blue-100 mb-6">
-                Expert medical care when you need it most
-              </p>
               <p className="text-lg text-blue-50 mb-8">
                 Schedule appointments, consult with specialists, and manage your healthcare needs with our AI-powered assistant available 24/7.
               </p>
@@ -77,7 +71,7 @@ export default function Home() {
                       const value = e.target.value.replace(/\D/g, '')
                       setIdNumber(value)
                     }}
-                    className="w-full px-4 py-3 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
+                    className="w-full px-4 py-3 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
                     placeholder="Enter your 8-digit patient ID"
                     maxLength={8}
                   />
@@ -116,7 +110,7 @@ export default function Home() {
           <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-slate-100">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
               <svg
-                className="w-6 h-6 text-blue-600"
+                className="w-6 h-6 text-blue-900"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -138,7 +132,7 @@ export default function Home() {
           <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-slate-100">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
               <svg
-                className="w-6 h-6 text-blue-600"
+                className="w-6 h-6 text-blue-900"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -160,7 +154,7 @@ export default function Home() {
           <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-slate-100">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
               <svg
-                className="w-6 h-6 text-blue-600"
+                className="w-6 h-6 text-blue-900"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
