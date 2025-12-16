@@ -4,11 +4,15 @@ A sophisticated multi-agent AI system for managing medical appointments and lab 
 
 ## Architecture
 
-This system implements a **supervisor-agent pattern** using LangGraph, where a supervisor agent intelligently routes patient queries to specialized agents:
+This system implements a **hierarchical supervisor-agent pattern** using LangGraph, where a main supervisor agent routes queries to specialized supervisor agents, which in turn manage individual worker agents:
 
-- **Supervisor Agent**: Routes queries to appropriate specialized agents
-- **Doctor Appointment Agent**: Handles appointment scheduling, doctor selection, and booking management
-- **Lab & Diagnostics Agent**: Manages lab test requests and diagnostic appointments
+- **Supervisor Agent (Main)**: Primary orchestrator that routes requests to specialized supervisor agents
+  - **Doctor Management Supervisor Agent**: Manages doctor-related operations
+    - **Doctor Availability Info Agent**: Provides doctor availability information
+    - **Doctor Booking Agent**: Handles appointment bookings
+  - **Lab Test Management Supervisor Agent**: Manages lab test-related operations
+    - **Lab Info Agent**: Provides lab test information
+    - **Lab Booking Agent**: Handles lab test bookings
 
 ### System Architecture Diagram
 
@@ -21,27 +25,27 @@ The following diagram illustrates the complete cloud-native architecture of the 
 The system is deployed on AWS with the following components:
 
 **Frontend Layer:**
-- **Next.js Frontend**: React-based web application deployed as static files
-- **Amazon S3**: Stores static frontend assets
-- **Amazon CloudFront**: Content Delivery Network (CDN) for fast global content delivery
-- **Authenticated Users**: Access the web application through CloudFront
+- **Next.js Frontend**: React-based web application with Server-Side Rendering (SSR) support
+- **AWS Amplify**: Hosts and deploys the frontend application with CI/CD integration
+- **GitHub Frontend Repo**: Source code repository that Amplify monitors for automatic deployments
+- **Authenticated Users**: Access the web application through AWS Amplify
 
 **Backend Layer:**
 - **AWS API Gateway**: Entry point for API requests from the frontend
 - **AWS Load Balancer**: Distributes traffic across multiple backend instances
 - **Amazon ECS (Fargate)**: Container orchestration service running Docker containers
-- **Amazon ECR**: Container registry storing Docker images
-- **FastAPI Backend API**: Python-based REST API handling business logic
+- **Amazon ECR**: Container registry storing Docker images for ECS deployment
+- **FastAPI Backend API**: Python-based REST API handling business logic and agent orchestration
 
-**AI Agent System (LangGraph):**
-- **Supervisor Agent (Main)**: Primary orchestrator that routes requests to specialized agents
-- **Doctor Management Supervisor Agent**: Manages doctor-related operations
-- **Lab Test Management Supervisor Agent**: Manages lab test-related operations
-- **Individual Agents**:
-  - Doctor Availability Info Agent: Provides doctor availability information
-  - Doctor Booking Agent: Handles appointment bookings
-  - Lab Info Agent: Provides lab test information
-  - Lab Booking Agent: Handles lab test bookings
+**AI Agent System (LangGraph & Docker):**
+- **Supervisor Agent (Main)**: Primary orchestrator that routes requests to specialized supervisor agents
+  - **Doctor Management Supervisor Agent**: Manages doctor-related operations and routes to:
+    - **Doctor Availability Info Agent**: Provides doctor availability information and schedules
+    - **Doctor Booking Agent**: Handles appointment bookings, cancellations, and rescheduling
+  - **Lab Test Management Supervisor Agent**: Manages lab test-related operations and routes to:
+    - **Lab Info Agent**: Provides lab test information and prerequisites
+    - **Lab Booking Agent**: Handles lab test bookings and scheduling
+- All agents are containerized using Docker and orchestrated through LangGraph
 
 **Data Layer:**
 - **Amazon RDS PostgreSQL**: Relational database for persistent data storage
@@ -51,13 +55,17 @@ The system is deployed on AWS with the following components:
 - **Amazon CloudWatch**: Centralized logging and monitoring for all components
 
 **Data Flow:**
-1. Authenticated users interact with the web application
-2. Static content is served by CloudFront from S3
-3. API requests are routed through CloudFront → API Gateway → Load Balancer → ECS
-4. FastAPI backend processes requests through the LangGraph agent system
-5. Agents interact with RDS PostgreSQL for data operations
-6. Conversation memory is stored/retrieved from S3
-7. All components log to CloudWatch for monitoring
+1. Authenticated users interact with the web application hosted on AWS Amplify
+2. AWS Amplify pulls the Next.js frontend from the GitHub Frontend Repository
+3. API requests from the frontend are routed through AWS API Gateway
+4. API Gateway forwards requests to AWS Load Balancer
+5. Load Balancer distributes traffic to Amazon ECS (Fargate) containers
+6. FastAPI backend processes requests through the LangGraph agent system
+7. The Supervisor Agent (Main) routes to appropriate specialized supervisor agents
+8. Specialized supervisor agents delegate to individual worker agents
+9. Individual agents interact with Amazon RDS PostgreSQL for data operations
+10. Conversation memory is stored/retrieved from Amazon S3 (Agent Memory bucket)
+11. All components log to Amazon CloudWatch for monitoring and observability
 
 ## Features
 
@@ -66,8 +74,9 @@ The system is deployed on AWS with the following components:
 - **Doctor Scheduling**: Real-time availability checking and appointment booking
 - **Lab Test Management**: Request and schedule lab tests and diagnostics
 - **Cloud-Native Architecture**: Fully deployed on AWS with scalable infrastructure
-- **Containerized Backend**: Docker-based deployment on ECS Fargate
-- **Static Frontend**: Optimized static site deployment on S3 + CloudFront
+- **Containerized Backend**: Docker-based deployment on ECS Fargate with ECR image registry
+- **CI/CD Frontend**: Automated deployment via AWS Amplify with GitHub integration
+- **Server-Side Rendering**: Next.js SSR support for dynamic content delivery
 - **Modern UI**: Clean, responsive Next.js frontend with real-time chat interface
 
 ## Project Structure
@@ -235,20 +244,35 @@ docker build -t agenticai-backend .
    - Set up Load Balancer and API Gateway
    - Configure security groups and IAM roles
 
-#### Frontend Deployment (AWS S3 + CloudFront)
+#### Frontend Deployment (AWS Amplify)
 
-1. Build static export:
+1. Push code to GitHub repository:
 ```bash
-cd frontend
-npm run build
+git add .
+git commit -m "Deploy frontend"
+git push origin main
 ```
 
-2. Deploy to S3:
+2. Connect to AWS Amplify:
+   - Go to AWS Amplify Console
+   - Click "New app" → "Host web app"
+   - Connect your GitHub repository
+   - Select the repository and branch
+   - Amplify will auto-detect Next.js and configure build settings
 
-3. Configure CloudFront:
-   - Set up distribution pointing to S3 bucket
-   - Configure error pages (404/403 → index.html) for client-side routing
-   - Set up SSL certificate and custom domain (optional)
+3. Configure build settings:
+   - Amplify will use the `amplify.yml` file in the repository root
+   - Set environment variables in Amplify Console:
+     - `NEXT_PUBLIC_BACKEND_URL`: Your backend API Gateway URL
+   - Amplify will automatically:
+     - Build the Next.js application
+     - Deploy with SSR support
+     - Set up CloudFront distribution
+     - Configure SSL certificates
+
+4. Custom domain (optional):
+   - Configure custom domain in Amplify Console
+   - Amplify handles SSL certificate provisioning automatically
 
 ## API Endpoints
 
@@ -299,20 +323,25 @@ Health check endpoint for monitoring.
 
 ### Frontend Configuration
 
-- **Static Export**: Configured in `frontend/next.config.js` with `output: 'export'`
-- **Backend URL**: Set via `NEXT_PUBLIC_BACKEND_URL` environment variable
-- **Images**: Unoptimized for static export compatibility
+- **Next.js SSR**: Configured in `frontend/next.config.js` (SSR enabled for Amplify)
+- **Backend URL**: Set via `NEXT_PUBLIC_BACKEND_URL` environment variable in Amplify Console
+- **Amplify Build**: Configured via `amplify.yml` in repository root
+- **Images**: Can be optimized or unoptimized depending on deployment needs
 
 ### AWS Infrastructure
 
-- **RDS PostgreSQL**: Database for persistent data
+- **AWS Amplify**: Frontend hosting with CI/CD, SSR support, and automatic deployments
+- **GitHub Integration**: Source code repository connected to Amplify for automatic builds
+- **RDS PostgreSQL**: Database for persistent data storage
 - **S3 Buckets**: 
-  - Frontend static assets
-  - Agent conversation memory
+  - Agent conversation memory storage
+  - (Frontend assets are managed by Amplify automatically)
 - **ECS Fargate**: Containerized backend deployment
-- **CloudFront**: CDN for frontend delivery
-- **API Gateway**: API endpoint management
-- **CloudWatch**: Logging and monitoring
+- **ECR**: Container registry for Docker images
+- **API Gateway**: API endpoint management and routing
+- **Load Balancer**: Traffic distribution across ECS tasks
+- **CloudFront**: CDN automatically configured by Amplify for frontend delivery
+- **CloudWatch**: Logging and monitoring for all components
 
 ## Development
 
@@ -347,7 +376,7 @@ The system includes:
 - **TypeScript**: Type-safe frontend development
 - **Tailwind CSS**: Utility-first CSS framework
 - **Docker**: Containerization for backend deployment
-- **AWS Services**: ECS, S3, CloudFront, RDS, API Gateway, CloudWatch
+- **AWS Services**: Amplify, ECS, ECR, S3, CloudFront, RDS, API Gateway, Load Balancer, CloudWatch
 - **boto3**: AWS SDK for Python (S3 operations)
 
 ## Contributing
